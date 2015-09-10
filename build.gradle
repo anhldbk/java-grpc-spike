@@ -11,6 +11,11 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'application'
+
+description = "grpc spike"
+startScripts.enabled = false
+run.enabled = false
 
 repositories {
   mavenCentral()
@@ -65,4 +70,24 @@ dependencies {
   compile 'com.google.protobuf:protobuf-java:3.0.0-beta-1'
   compile 'io.grpc:grpc-all:0.8.0'
   compile 'org.slf4j:slf4j-api:1.7.12'
+}
+
+task helloWorldServer(type: CreateStartScripts) {
+  mainClassName = "net.dehora.grpc.spike.service.GrpcServerMain"
+  outputDir = new File(project.buildDir, 'tmp')
+  applicationName = "hello-world-server"
+  classpath = jar.outputs.files + project.configurations.runtime
+}
+
+task helloWorldClient(type: CreateStartScripts) {
+  mainClassName = "net.dehora.grpc.spike.service.GrpcGreeterClient"
+  outputDir = new File(project.buildDir, 'tmp')
+  applicationName = "hello-world-client"
+  classpath = jar.outputs.files + project.configurations.runtime
+}
+
+applicationDistribution.into("bin") {
+  from(helloWorldServer)
+  from(helloWorldClient)
+  fileMode = 0755
 }
